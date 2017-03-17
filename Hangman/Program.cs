@@ -13,6 +13,7 @@ namespace Hangman
 
         private static string input = string.Empty;
 
+
         public static string Input
         {
             get
@@ -22,7 +23,7 @@ namespace Hangman
             
         }
              
-        private static char? guess;
+        private static char? guess = null;
 
         public static char? Guess
         {
