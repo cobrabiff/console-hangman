@@ -13,18 +13,18 @@ namespace Hangman
 
         private static string input = string.Empty;
 
-
         public static string Input
         {
             get
             {
                 return input;
             }
-            
-        }
-             
-        private static char? guess = null;
 
+        }
+
+        private static char? guess;
+
+        //Encapsulation
         public static char? Guess
         {
             get
@@ -37,7 +37,7 @@ namespace Hangman
                 }
                 //Console.WriteLine("Cannot contain numbers.");
                 //Console.ReadLine();
-                return null;
+                return ' ';
             }
             set
             {
@@ -45,10 +45,15 @@ namespace Hangman
             }
         }
 
+        string[] wordBank = { "framework", "dotnet", "programming", "development", "microsoft" };
 
         //List of incorrect letters guessed
-        static List<char> incorrectGuesses = new List<char>();
-        
+        //static List<char> incorrectGuesses = new List<char>();
+        static char[] incorrectGuesses = new char[26];
+        static char[] alphabet = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+        //alternative
+        static int incorrectGuessCount = 0;
+
         //List of correct letters guessed
         static List<char> correctGuesses = new List<char>();
 
@@ -58,18 +63,33 @@ namespace Hangman
         static string wordToUpper = string.Empty;
         static StringBuilder puzzleDisplay = null;
 
+
         /// <summary>
         /// 
         /// </summary>
-        static void Initialize()
+        static bool initialize()
         {
             guessesLeft = int.Parse(ConfigurationManager.AppSettings["NumberOfGuesses"]);
+
             word = ConfigurationManager.AppSettings["WordToGuess"];
-            wordToUpper = word.ToUpper();
-            puzzleDisplay = new StringBuilder();
-            for (int i = 0; i < word.Length; i++)
+
+            //Random random = new Random((int)DateTime.Now.Ticks);
+
+            if (word != null && word != string.Empty)
             {
-                puzzleDisplay.Append("*");
+                wordToUpper = word.ToUpper();
+                puzzleDisplay = new StringBuilder();
+                for (int i = 0; i < word.Length; i++)
+                {
+                    puzzleDisplay.Append("*");
+                }
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Word is not valid.");
+                //Console.ReadLine();
+                return false;
             }
         }
 
@@ -79,38 +99,56 @@ namespace Hangman
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            Initialize();
-
-            Console.WriteLine("Welcome to hangman!");
-          
-            while (!hasWon && guessesLeft > 0)
+            if (initialize())
             {
 
-                Console.WriteLine("You have " + guessesLeft + " guesses left");
+                Console.WriteLine("Welcome to hangman!");
 
-                Console.WriteLine("Please enter your guess as a single letter:");
+                Console.WriteLine(puzzleDisplay.ToString());
 
-                input = Console.ReadLine().ToUpper();
-                Guess = input[0];
-
-                if (Guess.HasValue)
+                while (!hasWon && guessesLeft > 0)
                 {
+
+                    Console.WriteLine("You have " + guessesLeft + " guesses left");
+
+                    Console.WriteLine("Please enter your guess as a single letter:");
+
+
+                    Console.WriteLine("Letters chosen:");
+
+                    for (int i = 0; i < incorrectGuesses.Length; i++)
+                    {
+                        Console.Write(incorrectGuesses[i]);
+                    }
+                    Console.WriteLine();
+
+                    input = Console.ReadLine().ToUpper();
+
+
+
+                    Guess = input[0];
+
                     Console.WriteLine("Your guess is " + Guess.Value);
 
                     //get the result of their first guess and check if they have already attempted this guess.
                     if (correctGuesses.Contains(Guess.Value))
                     {
+                        Console.Clear();
                         Console.WriteLine("You've already correctly guessed this letter. Guess again.");
+                        Console.WriteLine(puzzleDisplay.ToString());
                         continue;
                     }
                     else if (incorrectGuesses.Contains(Guess.Value))
                     {
+                        Console.Clear();
                         Console.WriteLine("You've already incorrectly guessed this letter. Guess again.");
+                        Console.WriteLine(puzzleDisplay.ToString());
                         continue;
                     }
 
                     if (wordToUpper.Contains(Guess.Value))
                     {
+                        Console.Clear();
                         Console.WriteLine("Correct!");
                         correctGuesses.Add(Guess.Value);
                         for (int i = 0; i < wordToUpper.Length; i++)
@@ -128,25 +166,38 @@ namespace Hangman
                     }
                     else
                     {
+                        Console.Clear();
+
                         Console.WriteLine("Incorrect!");
-                        incorrectGuesses.Add(Guess.Value);
+
+                        incorrectGuesses[incorrectGuessCount] = Guess.Value;
+
+                        //for(int i = 0; i < alphabet.Length; i++)
+                        //{
+                        //    if (alphabet[i] == Guess.Value)
+                        //    {
+                        //        incorrectGuesses[i] = alphabet[i];
+                        //    }
+                        //}
+
+                        incorrectGuessCount++;
+
+                        //incorrectGuesses.Add(Guess.Value);
+
                         guessesLeft--;
                     }
+                    Console.WriteLine(puzzleDisplay.ToString());
+                }
+
+                if (hasWon)
+                {
+                    Console.WriteLine("Winner, winner, chicken dinner!");
                 }
                 else
                 {
-                    Console.WriteLine("Invalid entry. Try again.");
+                    Console.WriteLine("Loser!");
                 }
-                Console.WriteLine(puzzleDisplay.ToString());
-            }
-
-            if (hasWon)
-            {
-                Console.WriteLine("Winner, winner, chicken dinner!");
-            }
-            else
-            {
-                Console.WriteLine("Loser!");
+                //Console.ReadLine();
             }
             Console.ReadLine();
         }
